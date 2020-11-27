@@ -1,10 +1,10 @@
-ZEROTIER_VERSION = 1.6.0
+ZEROTIER_VERSION = 1.6.1
 CACHE_BUST = $(shell date -u +"%Y-%m-%dT00:00:00Z")
 
 define build_image
   docker build . --pull \
     --tag bltavares/zerotier:$(1) \
-		--tag bltavares/zerotier:$(ZEROTIER_VERSION)-$(1) \
+		--tag lifeym/zerotier:$(ZEROTIER_VERSION)-$(1) \
 		--build-arg ZEROTIER_VERSION=$(ZEROTIER_VERSION) \
 		--build-arg BUILD_DATE=$(CACHE_BUST) \
 		--build-arg BUILDER_ARCH=$(1) \
@@ -15,7 +15,7 @@ amd64:
 	$(call build_image,amd64)
 
 x86:
-	$(call build_image,i386)
+	$(call build_image,386)
 
 arm64:
 	$(call build_image,arm64v8)
@@ -24,22 +24,22 @@ armhf:
 	$(call build_image,arm32v7)
 
 armel:
-	$(call build_image,arm32v5)
+	$(call build_image,arm32v6)
 
 ppc64le:
 	$(call build_image,ppc64le)
 
 publish:
 	docker push bltavares/zerotier:amd64
-	docker push bltavares/zerotier:i386
-	docker push bltavares/zerotier:arm32v5
+	docker push bltavares/zerotier:386
+	docker push bltavares/zerotier:arm32v6
 	docker push bltavares/zerotier:arm32v7
 	docker push bltavares/zerotier:arm64v8
 	docker push bltavares/zerotier:ppc64le
 
 	docker push bltavares/zerotier:$(ZEROTIER_VERSION)-amd64
-	docker push bltavares/zerotier:$(ZEROTIER_VERSION)-i386
-	docker push bltavares/zerotier:$(ZEROTIER_VERSION)-arm32v5
+	docker push bltavares/zerotier:$(ZEROTIER_VERSION)-386
+	docker push bltavares/zerotier:$(ZEROTIER_VERSION)-arm32v6
 	docker push bltavares/zerotier:$(ZEROTIER_VERSION)-arm32v7
 	docker push bltavares/zerotier:$(ZEROTIER_VERSION)-arm64v8
 	docker push bltavares/zerotier:$(ZEROTIER_VERSION)-ppc64le

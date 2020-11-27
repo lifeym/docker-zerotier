@@ -1,27 +1,14 @@
-ARG BUILDER_ARCH=amd64
+#ARG BUILDER_ARCH=amd64
 ARG TARGET_ARCH=amd64
-
-## Supports x86_64, x86, armhf, arm64, ppc64le, armle
-FROM ${BUILDER_ARCH}/debian:stretch as builder
 ARG ZEROTIER_VERSION
-RUN apt-get update && apt-get install -y curl gnupg
-RUN ( \
-    apt-key adv --batch --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 0x1657198823e52a61 || \
-    apt-key adv --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys 0x1657198823e52a61 || \
-    apt-key adv --batch --keyserver hkp://keyserver.pgp.com:80 --recv-keys 0x1657198823e52a61 || \
-    apt-key adv --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys 0x1657198823e52a61 \
-    ) && \
-    echo "deb http://download.zerotier.com/debian/stretch stretch main" > /etc/apt/sources.list.d/zerotier.list
-RUN apt-get update && apt-get install -y zerotier-one=${ZEROTIER_VERSION}
 
-FROM ${TARGET_ARCH}/debian:stable-slim
-ARG ZEROTIER_VERSION
 ARG BUILD_DATE
-LABEL version="${ZEROTIER_VERSION}" \
-    description="Containerized ZeroTier One for use on CoreOS or other Docker-only Linux hosts." \
+LABEL maintainer="Docker Containerized ZeroTier One Maintainers <leonardo_yu@hotmail.com>"
+    version="${ZEROTIER_VERSION}" \
+    description="Docker Containerized ZeroTier One for use on Linux hosts." \
     org.label-schema.schema-version="1.0" \
     org.label-schema.name="zerotier" \
-    org.label-schema.description="Containerized ZeroTier One for use on CoreOS or other Docker-only Linux hosts." \
+    org.label-schema.description="Docker Containerized ZeroTier One for use on Linux hosts." \
     org.label-schema.build-date="${BUILD_DATE}" \
     org.label-schema.url="https://zerotier.com" \
     org.label-schema.version="{$ZEROTIER_VERSION}" \
@@ -32,14 +19,29 @@ LABEL version="${ZEROTIER_VERSION}" \
     --cap-add=CAP_SYS_RAWIO \
     -v /var/lib/zerotier-one:/var/lib/zerotier-one \
     -n zerotier-one \
-    -d bltavares/zerotier"
+    -d lifeym/zerotier"
 
-RUN mkdir -p /var/lib/zerotier-one
+## Supports x86_64, x86, armhf, arm64, ppc64le, armle
+FROM ${TARGET_ARCH}/alpine:3.12
 
-COPY --from=builder \
-    /var/lib/zerotier-one/zerotier-cli \
-    /var/lib/zerotier-one/zerotier-idtool \
-    /usr/sbin/zerotier-one \
-    /usr/sbin/
+RUN set -x \
+# using alpine mirror for building in china
+    && echo "https://mirrors.aliyun.com/alpine/v3.12/main/" | tee /etc/apk/repositories \
+    && echo "https://mirrors.aliyun.com/alpine/v3.12/community/" | tee -a /etc/apk/repositories \
+#    && apk update \
+    && tempDir="$(mktemp -d)" \
+    && apk add --no-cache --virtual .build-deps \
+        git \
+        clang \
+        make \
+        alpine-sdk \
+    && cd ${tempDir} \
+    && git clone --branch ${ZEROTIER_VERSION} https://github.com/zerotier/ZeroTierOne.git \
+    && if [ ! -d ZeroTierOne ]; then rm ${result_path}trials; fi \
+    && cd ZeroTierOne \
+    && make \
+    && make install \
+    && apk del .build-deps \
+    && if [ -n "$tempDir" ]; then rm -rf "$tempDir"; fi
 
 CMD ["/usr/sbin/zerotier-one"]
