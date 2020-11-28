@@ -28,18 +28,18 @@ RUN set -x \
 # using alpine mirror for building in china
     && echo "https://mirrors.aliyun.com/alpine/v3.12/main/" | tee /etc/apk/repositories \
     && echo "https://mirrors.aliyun.com/alpine/v3.12/community/" | tee -a /etc/apk/repositories \
-#    && apk update \
+    && apk update \
     && tempDir="$(mktemp -d)" \
     && apk add --no-cache --virtual .build-deps \
-        git \
         clang \
         make \
         alpine-sdk \
     && cd ${tempDir} \
-    && git clone --branch ${ZEROTIER_VERSION} https://github.com/zerotier/ZeroTierOne.git \
-    && if [ ! -d ZeroTierOne ]; then rm ${result_path}trials; fi \
-    && cd ZeroTierOne \
-    && make \
+    && wget -c https://github.com/zerotier/ZeroTierOne/archive/$ZEROTIER_VERSION.tar.gz
+	&& tar xzvf $ZEROTIER_VERSION.tar.gz
+    && cd ZeroTierOne-$ZEROTIER_VERSION \
+    && make selftest \
+	&& make
     && make install \
     && apk del .build-deps \
     && if [ -n "$tempDir" ]; then rm -rf "$tempDir"; fi
