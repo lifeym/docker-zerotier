@@ -1,9 +1,12 @@
-#ARG BUILDER_ARCH=amd64
 ARG TARGET_ARCH=amd64
-ARG ZEROTIER_VERSION
 
+## Supports x86_64, x86, armhf, arm64, ppc64le, armle
+FROM ${TARGET_ARCH}/alpine:3.12
+
+ARG ZEROTIER_VERSION
 ARG BUILD_DATE
-LABEL maintainer="Docker Containerized ZeroTier One Maintainers <leonardo_yu@hotmail.com>"
+
+LABEL maintainer="Docker Containerized ZeroTier One Maintainers <leonardo_yu@hotmail.com>" \
     version="${ZEROTIER_VERSION}" \
     description="Docker Containerized ZeroTier One for use on Linux hosts." \
     org.label-schema.schema-version="1.0" \
@@ -17,31 +20,30 @@ LABEL maintainer="Docker Containerized ZeroTier One Maintainers <leonardo_yu@hot
     --cap-add=NET_ADMIN \
     --cap-add=SYS_ADMIN \
     --cap-add=CAP_SYS_RAWIO \
-    -v /var/lib/zerotier-one:/var/lib/zerotier-one \
-    -n zerotier-one \
+    -v /path/to/my-zerotier-one:/var/lib/zerotier-one \
+    --name zerotier-one \
     -d lifeym/zerotier"
 
-## Supports x86_64, x86, armhf, arm64, ppc64le, armle
-FROM ${TARGET_ARCH}/alpine:3.12
-
 RUN set -x \
-# using alpine mirror for building in china
-    && echo "https://mirrors.aliyun.com/alpine/v3.12/main/" | tee /etc/apk/repositories \
-    && echo "https://mirrors.aliyun.com/alpine/v3.12/community/" | tee -a /etc/apk/repositories \
-    && apk update \
+# add runtime dependences to world
+    && apk add libstdc++ \
     && tempDir="$(mktemp -d)" \
-    && apk add --no-cache --virtual .build-deps \
+# build and install
+    && apk add --no-cache --virtual .build-deps \
         clang \
         make \
+        linux-headers \
         alpine-sdk \
     && cd ${tempDir} \
-    && wget -c https://github.com/zerotier/ZeroTierOne/archive/$ZEROTIER_VERSION.tar.gz
-	&& tar xzvf $ZEROTIER_VERSION.tar.gz
-    && cd ZeroTierOne-$ZEROTIER_VERSION \
+    && wget -c "https://github.com/zerotier/ZeroTierOne/archive/$ZEROTIER_VERSION.tar.gz" \
+    && tar xzvf "$ZEROTIER_VERSION.tar.gz" \
+    && cd "ZeroTierOne-$ZEROTIER_VERSION" \
     && make selftest \
-	&& make
+    && make \
     && make install \
     && apk del .build-deps \
     && if [ -n "$tempDir" ]; then rm -rf "$tempDir"; fi
 
-CMD ["/usr/sbin/zerotier-one"]
+VOLUME ["/var/lib/zerotier-one"]
+
+CMD ["zerotier-one"]
