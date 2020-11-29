@@ -35,7 +35,7 @@ RUN set -x \
         linux-headers \
         alpine-sdk \
     && cd ${tempDir} \
-    && wget -c "https://github.com/zerotier/ZeroTierOne/archive/$ZEROTIER_VERSION.tar.gz" \
+    && wget "https://github.com/zerotier/ZeroTierOne/archive/$ZEROTIER_VERSION.tar.gz" \
     && tar xzvf "$ZEROTIER_VERSION.tar.gz" \
     && cd "ZeroTierOne-$ZEROTIER_VERSION" \
     && make selftest \
