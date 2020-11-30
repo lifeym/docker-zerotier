@@ -26,24 +26,29 @@ LABEL maintainer="Docker Containerized ZeroTier One Maintainers <leonardo_yu@hot
 
 RUN set -x \
 # add runtime dependences to world
-    && apk add libstdc++ \
+    && apk add --update --no-cache libgcc libstdc++ musl \
     && tempDir="$(mktemp -d)" \
 # build and install
-    && apk add --no-cache --virtual .build-deps \
+    && apk add --update --no-cache --virtual .build-deps \
         clang \
-        make \
+        cmake \
         linux-headers \
         alpine-sdk \
     && cd ${tempDir} \
     && wget "https://github.com/zerotier/ZeroTierOne/archive/$ZEROTIER_VERSION.tar.gz" \
     && tar xzvf "$ZEROTIER_VERSION.tar.gz" \
     && cd "ZeroTierOne-$ZEROTIER_VERSION" \
+#    && sed -i '288a\\toverride CFLAG+=-latomic\n\toverride CXXFLAG+=-latomic' make-linux.mk \
     && make selftest \
     && make \
     && make install \
     && apk del .build-deps \
     && if [ -n "$tempDir" ]; then rm -rf "$tempDir"; fi
 
+# ZeroTier relies on UDP port 9993
+EXPOSE 9993/udp
+
+# NOTE: to retain configuration; mount a Docker volume, or use a bind-mount, on /var/lib/zerotier-one
 VOLUME ["/var/lib/zerotier-one"]
 
 CMD ["zerotier-one"]
