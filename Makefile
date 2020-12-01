@@ -121,8 +121,8 @@ manifest-alpine:
 build-debian:
 	$(call build_image,debian,i386,i386)
 	$(call build_image,debian,amd64,amd64)
-	$(call build_image,debian,armv5,armv5)
-	$(call build_image,debian,armv7,armv7)
+	$(call build_image,debian,arm32v5,arm32v5)
+	$(call build_image,debian,arm32v7,arm32v7)
 	$(call build_image,debian,arm64v8,arm64v8)
 	$(call build_image,debian,mips64le,mips64le)
 	$(call build_image,debian,ppc64le,ppc64le)
@@ -131,8 +131,8 @@ build-debian:
 push-debian:
 	$(call push_image,i386)
 	$(call push_image,amd64)
-	$(call push_image,armv5)
-	$(call push_image,armv7)
+	$(call push_image,arm32v5)
+	$(call push_image,arm32v7)
 	$(call push_image,arm64v8)
 	$(call push_image,mips64le)
 	$(call push_image,ppc64le)
@@ -144,8 +144,8 @@ manifest-debian:
 		$(IMAGE_NAME):$(ZEROTIER_VERSION) \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-i386 \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-amd64 \
-		$(IMAGE_NAME):$(ZEROTIER_VERSION)-armv5 \
-		$(IMAGE_NAME):$(ZEROTIER_VERSION)-armv7 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-arm32v5 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-arm32v7 \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-arm64v8 \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-mips64le \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-ppc64le \
@@ -160,11 +160,11 @@ manifest-debian:
 		--arch amd64
 
 	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
-		$(IMAGE_NAME):$(ZEROTIER_VERSION)-armv5 --os linux \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-arm32v5 --os linux \
 		--arch arm --variant v5
 
 	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
-		$(IMAGE_NAME):$(ZEROTIER_VERSION)-armv7 --os linux \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-arm32v7 --os linux \
 		--arch arm --variant v7
 
 	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
@@ -206,11 +206,11 @@ manifest-debian:
 		--arch amd64
 
 	docker manifest annotate $(IMAGE_NAME):latest \
-		$(IMAGE_NAME):armv5 --os linux \
+		$(IMAGE_NAME):arm32v5 --os linux \
 		--arch arm --variant v5
 
 	docker manifest annotate $(IMAGE_NAME):latest \
-		$(IMAGE_NAME):armv7 --os linux \
+		$(IMAGE_NAME):arm32v7 --os linux \
 		--arch arm --variant v7
 
 	docker manifest annotate $(IMAGE_NAME):latest \
