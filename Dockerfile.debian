@@ -1,0 +1,56 @@
+## NOTE: to retain configuration; mount a Docker volume, or use a bind-mount, on /var/lib/zerotier-one
+ARG TARGET_ARCH=amd64
+
+## Supports x86_64, x86, arm, and arm64
+FROM ${TARGET_ARCH}/debian:buster-slim as builder
+
+ARG TARGET_ARCH
+ARG ZEROTIER_VERSION
+ARG BUILD_DATE
+
+RUN apt-get update && apt-get install -y curl gnupg
+RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 0x1657198823e52a61  && \
+    echo "deb http://download.zerotier.com/debian/buster buster main" > /etc/apt/sources.list.d/zerotier.list
+RUN apt-get update && apt-get install -y zerotier-one=${ZEROTIER_VERSION}
+#COPY ext/installfiles/linux/zerotier-containerized/main.sh /var/lib/zerotier-one/main.sh
+
+FROM debian:buster-slim
+
+LABEL maintainer="Containerized ZeroTier One Maintainers <leonardo_yu@hotmail.com>" \
+    version="${ZEROTIER_VERSION}" \
+    description="Containerized ZeroTier One for use on Linux hosts." \
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.name="zerotier" \
+    org.label-schema.description="Containerized ZeroTier One for use on Linux hosts." \
+    org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.url="https://zerotier.com" \
+    org.label-schema.version="{$ZEROTIER_VERSION}" \
+    org.label-schema.docker.cmd="docker run --device=/dev/net/tun \
+    --net=host \
+    --cap-add=NET_ADMIN \
+    --cap-add=SYS_ADMIN \
+    --cap-add=CAP_SYS_RAWIO \
+    -v /path/to/my-zerotier-one:/var/lib/zerotier-one \
+    --name zerotier-one \
+    -d lifeym/zerotier"
+
+# ZeroTier relies on UDP port 9993
+EXPOSE 9993/udp
+
+RUN mkdir -p /var/lib/zerotier-one
+#COPY --from=builder /usr/sbin/zerotier-cli /usr/sbin/zerotier-cli
+#COPY --from=builder /usr/sbin/zerotier-idtool /usr/sbin/zerotier-idtool
+#COPY --from=builder /usr/sbin/zerotier-one /usr/sbin/zerotier-one
+COPY --from=builder /usr/sbin/zerotier-cli \
+    /usr/sbin/zerotier-idtool \
+    /usr/sbin/zerotier-one \
+    /usr/sbin/
+#COPY --from=builder /var/lib/zerotier-one/main.sh /main.sh
+
+# NOTE: to retain configuration; mount a Docker volume, or use a bind-mount, on /var/lib/zerotier-one
+VOLUME ["/var/lib/zerotier-one"]
+
+#RUN chmod 0755 /main.sh
+#ENTRYPOINT ["/main.sh"]
+
+CMD ["zerotier-one"]

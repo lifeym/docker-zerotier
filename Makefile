@@ -1,134 +1,239 @@
 ZEROTIER_VERSION = 1.6.1
 SYS_DATE = $(shell date -u +"%Y-%m-%dT00:00:00Z")
 
+IMAGE_NAME=lifeym/zerotier
+
 define build_image
-	docker build . --pull \
-		--tag lifeym/zerotier:$(1) \
-		--tag lifeym/zerotier:$(ZEROTIER_VERSION)-$(1) \
+	docker build . -f Dockerfile.$(1) --pull \
+		--tag $(IMAGE_NAME):$(3) \
+		--tag $(IMAGE_NAME):$(ZEROTIER_VERSION)-$(3) \
 		--build-arg ZEROTIER_VERSION=$(ZEROTIER_VERSION) \
 		--build-arg BUILD_DATE=$(SYS_DATE) \
-		--build-arg TARGET_ARCH=$(1)
+		--build-arg TARGET_ARCH=$(2)
 endef
 
-x86:
-	$(call build_image,i386)
+define push_image
+	docker push $(IMAGE_NAME):$(1)
+	docker push $(IMAGE_NAME):$(ZEROTIER_VERSION)-$(1)
+endef
 
-amd64:
-	$(call build_image,amd64)
+build-alpine:
+	$(call build_image,alpine,i386,alpine-i386)
+	$(call build_image,alpine,amd64,alpine-amd64)
+	$(call build_image,alpine,arm32v6,alpine-arm32v6)
+	$(call build_image,alpine,arm32v7,alpine-arm32v7)
+	$(call build_image,alpine,arm64v8,alpine-arm64v8)
+	$(call build_image,alpine,ppc64le,alpine-ppc64le)
+	$(call build_image,alpine,s390x,alpine-s390x)
 
-arm32v6:
-	$(call build_image,arm32v6)
+push-alpine:
+	$(call push_image,alpine-i386)
+	$(call push_image,alpine-amd64)
+	$(call push_image,alpine-arm32v6)
+	$(call push_image,alpine-arm32v7)
+	$(call push_image,alpine-arm64v8)
+	$(call push_image,alpine-ppc64le)
+	$(call push_image,alpine-s390x)
 
-arm32v7:
-	$(call build_image,arm32v7)
-
-arm64:
-	$(call build_image,arm64v8)
-
-ppc64le:
-	$(call build_image,ppc64le)
-
-s390x:
-	$(call build_image,s390x)
-
-publish:
-	docker push lifeym/zerotier:i386
-	docker push lifeym/zerotier:amd64
-	docker push lifeym/zerotier:arm32v6
-	docker push lifeym/zerotier:arm32v7
-	docker push lifeym/zerotier:arm64v8
-	docker push lifeym/zerotier:ppc64le
-	docker push lifeym/zerotier:s390x
-
-	docker push lifeym/zerotier:$(ZEROTIER_VERSION)-i386
-	docker push lifeym/zerotier:$(ZEROTIER_VERSION)-amd64
-	docker push lifeym/zerotier:$(ZEROTIER_VERSION)-arm32v6
-	docker push lifeym/zerotier:$(ZEROTIER_VERSION)-arm32v7
-	docker push lifeym/zerotier:$(ZEROTIER_VERSION)-arm64v8
-	docker push lifeym/zerotier:$(ZEROTIER_VERSION)-ppc64le
-	docker push lifeym/zerotier:$(ZEROTIER_VERSION)-s390x
-
-manifest:
+manifest-alpine:
+# tag: version-alpine
 	docker manifest create \
-		lifeym/zerotier:$(ZEROTIER_VERSION) \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-i386 \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-amd64 \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-arm32v6 \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-arm32v7 \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-arm64v8 \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-ppc64le \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-s390x
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-i386 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-amd64 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-arm32v6 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-arm32v7 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-arm64v8 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-ppc64le \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-s390x
 
-	docker manifest annotate lifeym/zerotier:$(ZEROTIER_VERSION) \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-i386 --os linux \
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-i386 --os linux \
 		--arch 386
 
-	docker manifest annotate lifeym/zerotier:$(ZEROTIER_VERSION) \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-amd64 --os linux \
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-amd64 --os linux \
 		--arch amd64
 
-	docker manifest annotate lifeym/zerotier:$(ZEROTIER_VERSION) \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-arm32v6 --os linux \
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-arm32v6 --os linux \
 		--arch arm --variant v6
 
-	docker manifest annotate lifeym/zerotier:$(ZEROTIER_VERSION) \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-arm32v7 --os linux \
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-arm32v7 --os linux \
 		--arch arm --variant v7
 
-	docker manifest annotate lifeym/zerotier:$(ZEROTIER_VERSION) \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-arm64v8 --os linux \
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-arm64v8 --os linux \
 		--arch arm64 --variant v8
 
-	docker manifest annotate lifeym/zerotier:$(ZEROTIER_VERSION) \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-ppc64le --os linux \
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-ppc64le --os linux \
 		--arch ppc64le
 
-	docker manifest annotate lifeym/zerotier:$(ZEROTIER_VERSION) \
-		lifeym/zerotier:$(ZEROTIER_VERSION)-s390x --os linux \
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-s390x --os linux \
 		--arch s390x
 
-	docker manifest push --purge lifeym/zerotier:$(ZEROTIER_VERSION)
+	docker manifest push --purge $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine
 
+# tag: alpine
 	docker manifest create \
-		lifeym/zerotier:latest \
-		lifeym/zerotier:i386 \
-		lifeym/zerotier:amd64 \
-		lifeym/zerotier:arm32v6 \
-		lifeym/zerotier:arm32v7 \
-		lifeym/zerotier:arm64v8 \
-		lifeym/zerotier:ppc64le \
-		lifeym/zerotier:s390x
+		$(IMAGE_NAME):alpine \
+		$(IMAGE_NAME):alpine-i386 \
+		$(IMAGE_NAME):alpine-amd64 \
+		$(IMAGE_NAME):alpine-arm32v6 \
+		$(IMAGE_NAME):alpine-arm32v7 \
+		$(IMAGE_NAME):alpine-arm64v8 \
+		$(IMAGE_NAME):alpine-ppc64le \
+		$(IMAGE_NAME):alpine-s390x
 
-	docker manifest annotate lifeym/zerotier:latest \
-		lifeym/zerotier:i386 --os linux \
+	docker manifest annotate $(IMAGE_NAME):alpine \
+		$(IMAGE_NAME):alpine-i386 --os linux \
 		--arch 386
 
-	docker manifest annotate lifeym/zerotier:latest \
-		lifeym/zerotier:amd64 --os linux \
+	docker manifest annotate $(IMAGE_NAME):alpine \
+		$(IMAGE_NAME):alpine-amd64 --os linux \
 		--arch amd64
 
-	docker manifest annotate lifeym/zerotier:latest \
-		lifeym/zerotier:arm32v5 --os linux \
+	docker manifest annotate $(IMAGE_NAME):alpine \
+		$(IMAGE_NAME):alpine-arm32v6 --os linux \
 		--arch arm --variant v6
 
-	docker manifest annotate lifeym/zerotier:latest \
-		lifeym/zerotier:arm32v7 --os linux \
+	docker manifest annotate $(IMAGE_NAME):alpine \
+		$(IMAGE_NAME):alpine-arm32v7 --os linux \
 		--arch arm --variant v7
 
-	docker manifest annotate lifeym/zerotier:latest \
-		lifeym/zerotier:arm64v8 --os linux \
+	docker manifest annotate $(IMAGE_NAME):alpine \
+		$(IMAGE_NAME):alpine-arm64v8 --os linux \
 		--arch arm64 --variant v8
 
-	docker manifest annotate lifeym/zerotier:latest \
-		lifeym/zerotier:ppc64le --os linux \
+	docker manifest annotate $(IMAGE_NAME):alpine \
+		$(IMAGE_NAME):alpine-ppc64le --os linux \
 		--arch ppc64le
 
-	docker manifest annotate lifeym/zerotier:latest \
-		lifeym/zerotier:s390x --os linux \
+	docker manifest annotate $(IMAGE_NAME):alpine \
+		$(IMAGE_NAME):alpine-s390x --os linux \
 		--arch s390x
 
-	docker manifest push --purge lifeym/zerotier:latest
+	docker manifest push --purge $(IMAGE_NAME):alpine
 
-all: x86 amd64 arm32v6 arm32v7 arm64 ppc64le s390x
+build-debian:
+	$(call build_image,debian,i386,i386)
+	$(call build_image,debian,amd64,amd64)
+	$(call build_image,debian,armv5,armv5)
+	$(call build_image,debian,armv7,armv7)
+	$(call build_image,debian,arm64v8,arm64v8)
+	$(call build_image,debian,mips64le,mips64le)
+	$(call build_image,debian,ppc64le,ppc64le)
+	$(call build_image,debian,s390x,s390x)
 
-.PHONY: all x86 amd64 arm32v6 arm32v7 arm64 ppc64le s390x publish manifest
+push-debian:
+	$(call push_image,i386)
+	$(call push_image,amd64)
+	$(call push_image,armv5)
+	$(call push_image,armv7)
+	$(call push_image,arm64v8)
+	$(call push_image,mips64le)
+	$(call push_image,ppc64le)
+	$(call push_image,s390x)
+
+manifest-debian:
+# tag: version
+	docker manifest create \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-i386 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-amd64 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-armv5 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-armv7 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-arm64v8 \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-mips64le \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-ppc64le \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-s390x
+
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-i386 --os linux \
+		--arch 386
+
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-amd64 --os linux \
+		--arch amd64
+
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-armv5 --os linux \
+		--arch arm --variant v5
+
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-armv7 --os linux \
+		--arch arm --variant v7
+
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-arm64v8 --os linux \
+		--arch arm64 --variant v8
+
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-mips64le --os linux \
+		--arch mips64le
+
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-ppc64le --os linux \
+		--arch ppc64le
+
+	docker manifest annotate $(IMAGE_NAME):$(ZEROTIER_VERSION) \
+		$(IMAGE_NAME):$(ZEROTIER_VERSION)-s390x --os linux \
+		--arch s390x
+
+	docker manifest push --purge $(IMAGE_NAME):$(ZEROTIER_VERSION)
+
+# tag: latest
+	docker manifest create \
+		$(IMAGE_NAME):latest \
+		$(IMAGE_NAME):i386 \
+		$(IMAGE_NAME):amd64 \
+		$(IMAGE_NAME):armv5 \
+		$(IMAGE_NAME):armv7 \
+		$(IMAGE_NAME):arm64v8 \
+		$(IMAGE_NAME):mips64le \
+		$(IMAGE_NAME):ppc64le \
+		$(IMAGE_NAME):s390x
+
+	docker manifest annotate $(IMAGE_NAME):latest \
+		$(IMAGE_NAME):i386 --os linux \
+		--arch 386
+
+	docker manifest annotate $(IMAGE_NAME):latest \
+		$(IMAGE_NAME):amd64 --os linux \
+		--arch amd64
+
+	docker manifest annotate $(IMAGE_NAME):latest \
+		$(IMAGE_NAME):armv5 --os linux \
+		--arch arm --variant v5
+
+	docker manifest annotate $(IMAGE_NAME):latest \
+		$(IMAGE_NAME):armv7 --os linux \
+		--arch arm --variant v7
+
+	docker manifest annotate $(IMAGE_NAME):latest \
+		$(IMAGE_NAME):arm64v8 --os linux \
+		--arch arm64 --variant v8
+
+	docker manifest annotate $(IMAGE_NAME):latest \
+		$(IMAGE_NAME):ppc64le --os linux \
+		--arch mips64le
+
+	docker manifest annotate $(IMAGE_NAME):latest \
+		$(IMAGE_NAME):ppc64le --os linux \
+		--arch ppc64le
+
+	docker manifest annotate $(IMAGE_NAME):latest \
+		$(IMAGE_NAME):s390x --os linux \
+		--arch s390x
+
+	docker manifest push --purge $(IMAGE_NAME):latest
+
+build: build-alpine build-debian
+push: push-alpine push-debian
+manifest: manifest-alpine manifest-debian
+all: build
+
+.PHONY: all push manifest
