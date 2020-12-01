@@ -1,12 +1,10 @@
 ## NOTE: to retain configuration; mount a Docker volume, or use a bind-mount, on /var/lib/zerotier-one
-ARG TARGET_ARCH=amd64
+ARG BUILD_ARCH=amd64
 
 ## Supports x86_64, x86, arm, and arm64
-FROM ${TARGET_ARCH}/debian:buster-slim as builder
+FROM ${BUILD_ARCH}/debian:buster-slim as builder
 
-ARG TARGET_ARCH
 ARG ZEROTIER_VERSION
-ARG BUILD_DATE
 
 RUN apt-get update && apt-get install -y curl gnupg
 RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 0x1657198823e52a61  && \
@@ -14,7 +12,10 @@ RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 0x1657198823e
 RUN apt-get update && apt-get install -y zerotier-one=${ZEROTIER_VERSION}
 #COPY ext/installfiles/linux/zerotier-containerized/main.sh /var/lib/zerotier-one/main.sh
 
-FROM debian:buster-slim
+FROM ${BUILD_ARCH}/debian:buster-slim
+
+ARG ZEROTIER_VERSION
+ARG BUILD_DATE
 
 LABEL maintainer="Containerized ZeroTier One Maintainers <leonardo_yu@hotmail.com>" \
     version="${ZEROTIER_VERSION}" \

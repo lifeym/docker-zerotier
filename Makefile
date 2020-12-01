@@ -9,7 +9,7 @@ define build_image
 		--tag $(IMAGE_NAME):$(ZEROTIER_VERSION)-$(3) \
 		--build-arg ZEROTIER_VERSION=$(ZEROTIER_VERSION) \
 		--build-arg BUILD_DATE=$(SYS_DATE) \
-		--build-arg TARGET_ARCH=$(2)
+		--build-arg BUILD_ARCH=$(2)
 endef
 
 define push_image

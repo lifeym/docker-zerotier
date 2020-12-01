@@ -1,9 +1,9 @@
-ARG TARGET_ARCH=amd64
+ARG BUILD_ARCH=amd64
 
 ## Supports x86_64, x86, armhf, arm64, ppc64le, armle
-FROM ${TARGET_ARCH}/alpine:3.12
+FROM ${BUILD_ARCH}/alpine:3.12
 
-ARG TARGET_ARCH
+ARG BUILD_ARCH
 ARG ZEROTIER_VERSION
 ARG BUILD_DATE
 
@@ -41,7 +41,7 @@ RUN set -x \
     && tar xzvf "$ZEROTIER_VERSION.tar.gz" \
     && cd "ZeroTierOne-$ZEROTIER_VERSION" \
 # arm32v6/arm32v7 needs -latomic flag
-    && if [[ $TARGET_ARCH = "arm32v6" || $TARGET_ARCH = "arm32v7" ]]; then \
+    && if [[ $BUILD_ARCH = "arm32v6" || $BUILD_ARCH = "arm32v7" ]]; then \
         sed -i '288a\\toverride CFLAG+=-latomic\n\toverride CXXFLAG+=-latomic' make-linux.mk; fi \
     && make selftest \
     && make \
