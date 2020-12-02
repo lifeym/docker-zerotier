@@ -234,6 +234,6 @@ manifest-debian:
 build: build-alpine build-debian
 push: push-alpine push-debian
 manifest: manifest-alpine manifest-debian
-all: build
+all: build push manifest
 
-.PHONY: all push manifest
+.PHONY: all build build-alpine build-debian push push-alpine push-debian manifest manifest-alpine manifest-debian
