@@ -42,7 +42,7 @@ RUN set -x \
     && cd "ZeroTierOne-$ZEROTIER_VERSION" \
 # arm32v6/arm32v7 needs -latomic flag
     && if [[ $BUILD_ARCH = "arm32v6" || $BUILD_ARCH = "arm32v7" ]]; then \
-        sed -i '288a\\toverride CFLAGS+=-latomic\n\toverride CXXFLAGS+=-latomic' make-linux.mk; fi \
+        sed -i '288a\\toverride LDLIBS+=-latomic' make-linux.mk; fi \
     && make selftest \
     && make \
     && make install \
