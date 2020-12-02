@@ -33,7 +33,7 @@ RUN set -x \
 # build and install
     && apk add --no-cache --virtual .build-deps \
         clang \
-        cmake \
+        make \
         linux-headers \
         alpine-sdk \
     && cd ${tempDir} \
