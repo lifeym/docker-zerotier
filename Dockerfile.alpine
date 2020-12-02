@@ -1,6 +1,6 @@
 ARG BUILD_ARCH=amd64
 
-## Supports x86_64, x86, armhf, arm64, ppc64le, armle
+## See makefile for supported platform
 FROM ${BUILD_ARCH}/alpine:3.12
 
 ARG BUILD_ARCH
