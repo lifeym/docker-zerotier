@@ -37,7 +37,8 @@ push-alpine:
 
 manifest-alpine:
 # tag: version-alpine
-	docker manifest create \
+	MFLAG:=$(shell docker manifest inspect $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine && if [ $? -eq 1]; then echo '-a'; else echo ''; fi)
+	docker manifest create $(MFLAG) \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-i386 \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-amd64 \
@@ -190,8 +191,8 @@ manifest-debian:
 		$(IMAGE_NAME):latest \
 		$(IMAGE_NAME):i386 \
 		$(IMAGE_NAME):amd64 \
-		$(IMAGE_NAME):armv5 \
-		$(IMAGE_NAME):armv7 \
+		$(IMAGE_NAME):arm32v5 \
+		$(IMAGE_NAME):arm32v7 \
 		$(IMAGE_NAME):arm64v8 \
 		$(IMAGE_NAME):mips64le \
 		$(IMAGE_NAME):ppc64le \
