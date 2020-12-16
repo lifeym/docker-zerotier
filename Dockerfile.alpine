@@ -1,0 +1,58 @@
+ARG BUILD_ARCH=amd64
+
+## See makefile for supported platform
+FROM ${BUILD_ARCH}/alpine:3.12
+
+ARG BUILD_ARCH
+ARG ZEROTIER_VERSION
+ARG BUILD_DATE
+
+LABEL maintainer="Containerized ZeroTier One Maintainers <leonardo_yu@hotmail.com>" \
+    version="${ZEROTIER_VERSION}" \
+    description="Containerized ZeroTier One for use on Linux hosts." \
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.name="zerotier" \
+    org.label-schema.description="Containerized ZeroTier One for use on Linux hosts." \
+    org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.url="https://zerotier.com" \
+    org.label-schema.version="{$ZEROTIER_VERSION}" \
+    org.label-schema.docker.cmd="docker run --device=/dev/net/tun \
+    --net=host \
+    --cap-add=NET_ADMIN \
+    --cap-add=SYS_ADMIN \
+    --cap-add=CAP_SYS_RAWIO \
+    -v /path/to/my-zerotier-one:/var/lib/zerotier-one \
+    --name zerotier-one \
+    -d lifeym/zerotier"
+
+RUN set -x \
+# add runtime dependences to world
+    && apk update \
+    && apk add --no-cache libgcc libstdc++ musl \
+    && tempDir="$(mktemp -d)" \
+# build and install
+    && apk add --no-cache --virtual .build-deps \
+        clang \
+        make \
+        linux-headers \
+        alpine-sdk \
+    && cd ${tempDir} \
+    && wget "https://github.com/zerotier/ZeroTierOne/archive/$ZEROTIER_VERSION.tar.gz" \
+    && tar xzvf "$ZEROTIER_VERSION.tar.gz" \
+    && cd "ZeroTierOne-$ZEROTIER_VERSION" \
+# arm32v6/arm32v7 needs -latomic flag
+    && if [[ $BUILD_ARCH = "arm32v6" || $BUILD_ARCH = "arm32v7" ]]; then \
+        sed -i '288a\\toverride LDLIBS+=-latomic' make-linux.mk; fi \
+    && make selftest \
+    && make \
+    && make install \
+    && apk del .build-deps \
+    && if [ -n "$tempDir" ]; then rm -rf "$tempDir"; fi
+
+# ZeroTier relies on UDP port 9993
+EXPOSE 9993/udp
+
+# NOTE: to retain configuration; mount a Docker volume, or use a bind-mount, on /var/lib/zerotier-one
+VOLUME ["/var/lib/zerotier-one"]
+
+CMD ["zerotier-one"]
