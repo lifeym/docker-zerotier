@@ -1,4 +1,4 @@
-ZEROTIER_VERSION = 1.6.1
+ZEROTIER_VERSION = 1.6.3
 SYS_DATE = $(shell date -u +"%Y-%m-%dT00:00:00Z")
 
 IMAGE_NAME=lifeym/zerotier
