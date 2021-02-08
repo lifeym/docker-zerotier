@@ -23,6 +23,8 @@ Simply depends on base os image.
 - s390x
 
 # Tags
+- 1.6.3, 1.6.3-debian, latest
+- 1.6.3-alpine, alpine
 - 1.6.2, 1.6.2-debian, latest
 - 1.6.2-alpine, alpine
 - 1.6.1, 1.6.1-debian
