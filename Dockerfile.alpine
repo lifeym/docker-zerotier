@@ -37,7 +37,7 @@ RUN set -x \
         linux-headers \
         alpine-sdk \
     && cd ${tempDir} \
-    && wget "https://github.com/zerotier/ZeroTierOne/archive/$ZEROTIER_VERSION.tar.gz" \
+    && wget "https://github.com/zerotier/ZeroTierOne/archive/refs/tags/$ZEROTIER_VERSION.tar.gz" \
     && tar xzvf "$ZEROTIER_VERSION.tar.gz" \
     && cd "ZeroTierOne-$ZEROTIER_VERSION" \
 # arm32v6/arm32v7 needs -latomic flag

@@ -1,4 +1,5 @@
-ZEROTIER_VERSION = 1.6.1
+ZEROTIER_VERSION_SRC = 1.6.6-fixed-windows-inf
+ZEROTIER_VERSION = 1.6.6
 SYS_DATE = $(shell date -u +"%Y-%m-%dT00:00:00Z")
 
 IMAGE_NAME=lifeym/zerotier
@@ -7,7 +8,7 @@ define build_image
 	docker build . -f Dockerfile.$(1) --pull \
 		--tag $(IMAGE_NAME):$(3) \
 		--tag $(IMAGE_NAME):$(ZEROTIER_VERSION)-$(3) \
-		--build-arg ZEROTIER_VERSION=$(ZEROTIER_VERSION) \
+		--build-arg ZEROTIER_VERSION=$(4) \
 		--build-arg BUILD_DATE=$(SYS_DATE) \
 		--build-arg BUILD_ARCH=$(2)
 endef
@@ -18,13 +19,13 @@ define push_image
 endef
 
 build-alpine:
-	$(call build_image,alpine,i386,alpine-i386)
-	$(call build_image,alpine,amd64,alpine-amd64)
-	$(call build_image,alpine,arm32v6,alpine-arm32v6)
-	$(call build_image,alpine,arm32v7,alpine-arm32v7)
-	$(call build_image,alpine,arm64v8,alpine-arm64v8)
-	$(call build_image,alpine,ppc64le,alpine-ppc64le)
-	$(call build_image,alpine,s390x,alpine-s390x)
+	$(call build_image,alpine,i386,alpine-i386,$(ZEROTIER_VERSION_SRC))
+	$(call build_image,alpine,amd64,alpine-amd64,$(ZEROTIER_VERSION_SRC))
+	$(call build_image,alpine,arm32v6,alpine-arm32v6,$(ZEROTIER_VERSION_SRC))
+	$(call build_image,alpine,arm32v7,alpine-arm32v7,$(ZEROTIER_VERSION_SRC))
+	$(call build_image,alpine,arm64v8,alpine-arm64v8,$(ZEROTIER_VERSION_SRC))
+	$(call build_image,alpine,ppc64le,alpine-ppc64le,$(ZEROTIER_VERSION_SRC))
+	$(call build_image,alpine,s390x,alpine-s390x,$(ZEROTIER_VERSION_SRC))
 
 push-alpine:
 	$(call push_image,alpine-i386)
@@ -37,7 +38,7 @@ push-alpine:
 
 manifest-alpine:
 # tag: version-alpine
-	MFLAG:=$(shell docker manifest inspect $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine && if [ $? -eq 1]; then echo '-a'; else echo ''; fi)
+	MFLAG=$(shell docker manifest inspect $(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine && if [ $? -eq 1]; then echo '-a'; else echo ''; fi)
 	docker manifest create $(MFLAG) \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine \
 		$(IMAGE_NAME):$(ZEROTIER_VERSION)-alpine-i386 \
@@ -120,14 +121,14 @@ manifest-alpine:
 	docker manifest push --purge $(IMAGE_NAME):alpine
 
 build-debian:
-	$(call build_image,debian,i386,i386)
-	$(call build_image,debian,amd64,amd64)
-	$(call build_image,debian,arm32v5,arm32v5)
-	$(call build_image,debian,arm32v7,arm32v7)
-	$(call build_image,debian,arm64v8,arm64v8)
-	$(call build_image,debian,mips64le,mips64le)
-	$(call build_image,debian,ppc64le,ppc64le)
-	$(call build_image,debian,s390x,s390x)
+	$(call build_image,debian,i386,i386,$(ZEROTIER_VERSION))
+	$(call build_image,debian,amd64,amd64,$(ZEROTIER_VERSION))
+	$(call build_image,debian,arm32v5,arm32v5,$(ZEROTIER_VERSION))
+	$(call build_image,debian,arm32v7,arm32v7,$(ZEROTIER_VERSION))
+	$(call build_image,debian,arm64v8,arm64v8,$(ZEROTIER_VERSION))
+	$(call build_image,debian,mips64le,mips64le,$(ZEROTIER_VERSION))
+	$(call build_image,debian,ppc64le,ppc64le,$(ZEROTIER_VERSION))
+	$(call build_image,debian,s390x,s390x,$(ZEROTIER_VERSION))
 
 push-debian:
 	$(call push_image,i386)

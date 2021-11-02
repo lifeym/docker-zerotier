@@ -1,13 +1,15 @@
 ARG BUILD_ARCH=amd64
 
 ## See makefile for supported platform
-FROM ${BUILD_ARCH}/debian:buster-slim as builder
+FROM ${BUILD_ARCH}/debian:buster as builder
 
 ARG ZEROTIER_VERSION
 
 RUN apt-get update && apt-get install -y curl gnupg
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 0x1657198823e52a61  && \
-    echo "deb http://download.zerotier.com/debian/buster buster main" > /etc/apt/sources.list.d/zerotier.list
+#RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 0x1657198823e52a61  && \
+RUN curl -s -k -o tmp.gpg 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' \
+    && apt-key add tmp.gpg \
+    && echo "deb http://download.zerotier.com/debian/buster buster main" > /etc/apt/sources.list.d/zerotier.list
 RUN apt-get update && apt-get install -y zerotier-one=${ZEROTIER_VERSION}
 
 FROM ${BUILD_ARCH}/debian:buster-slim
