@@ -1,5 +1,5 @@
-ZEROTIER_VERSION_SRC = 1.6.6-fixed-windows-inf
-ZEROTIER_VERSION = 1.6.6
+ZEROTIER_VERSION_SRC = 1.8.3
+ZEROTIER_VERSION = 1.8.3
 SYS_DATE = $(shell date -u +"%Y-%m-%dT00:00:00Z")
 
 IMAGE_NAME=lifeym/zerotier
